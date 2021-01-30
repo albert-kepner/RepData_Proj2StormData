@@ -29,7 +29,7 @@ StormFocus1 <- stormData1 %>%
 ## For time of event we will just extract the year from BGN_DATE
 
 
-## Define a function to multiple a damage cost column (PROPDMG or CROPDMG)
+## Define a function to multiply a damage cost column (PROPDMG or CROPDMG)
 ## by the appropriate scale factor.
 mapCost <- function(cost, mult) {
   if(mult == "b" || mult == "B") {
@@ -39,11 +39,11 @@ mapCost <- function(cost, mult) {
   } else if(mult == "k" || mult == "K") {
     result <- cost * 1e3
   } else {
-    result <- NA
+    result <- cost
   }
   result
 }
-
+### This transforms the BGN_DATE in format "m/d/y hh:mm:ss" to just the year as an integer.
 year <- as.integer(sub(" 0:00:00","",sub("[0-9]+/[0-9]+/","",as.character(StormFocus1$BGN_DATE))))
 
 StormFocus2 <- cbind(StormFocus1,year)
@@ -53,19 +53,35 @@ summary(StormFocus2)
 
 StormFocus3 <- StormFocus2 %>% rowwise() %>%
   mutate(property_cost=mapCost(PROPDMG, PROPDMGEXP), 
-         crop_cost=mapCost(CROPDMG, CROPDMGEXP)) %>%
+         crop_cost=mapCost(CROPDMG, CROPDMGEXP),
+         total_cost=sum(property_cost, crop_cost, na.rm=TRUE),
+         harm_to_persons=sum(FATALITIES,INJURIES, na.rm=TRUE)) %>%
            ungroup()
 
-summary(StormFocus3)
+StormFocus4 <- StormFocus3 %>% rename(Event_Type = EVTYPE) %>%  
+  select(STATE, year, Event_Type, FATALITIES, INJURIES, harm_to_persons, 
+         property_cost, crop_cost, total_cost)
          
+
+summary(StormFocus4)
+
+## Rank Event_Type by total_cost descending (summed across all years and locations)
+
+TotalCostRank <- StormFocus4 %>% group_by(Event_Type) %>%
+  summarize(TotalCost = sum(total_cost), Count=n()) %>%
+  arrange(desc(TotalCost))
+
+TotalCostRank
+
+## Rank Event_type by harm_to_persons descending(summed across all years and locations)
+
+HarmToPersonsRank <- StormFocus4 %>% group_by(Event_Type) %>%
+  summarize(HarmToPersons = sum(harm_to_persons), Count=n()) %>%
+  arrange(desc(HarmToPersons))
+
+HarmToPersonsRank
+
+
          
-  
 
-StormFocus2 %>% group_by(CROPDMGEXP) %>% summarize(sum_crop=sum(CROPDMG), count= n())
-
-StormFocus2 %>% group_by(PROPDMGEXP) %>% summarize(sum_prop=sum(PROPDMG), count = n())
-
-str(StormFocus2)
-
-xx <- sub("[0-9]+/[0-9]+/([0-9]+) ",as.character(StormFocus1$BGN_DATE),replacement="\1")
 
