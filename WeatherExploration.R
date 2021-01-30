@@ -23,4 +23,32 @@ names(stormData1)
 ## Event Type, harm to persons, economic impact
 
 StormFocus1 <- stormData1 %>% 
-  select(BGN_DATE, STATE, EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP)
+  select(BGN_DATE, STATE, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG, PROPDMGEXP, CROPDMGEXP)
+
+## For harm to persons we will sum the FATALITIES and INJURIES columns.
+## For economic impact we will sum the PROPDMGEXP and CROPDMGEXP columns.
+## For time of event we will just extract the year from BGN_DATE
+
+dates1 <- head(StormFocus1$BGN_DATE)
+
+dates2 <- mdy_hms(dates1)
+
+dates3 <- as.Date(dates2)
+
+format(as.Date(dates2, format="%d/%m/%Y"),"%Y")
+
+years <- as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))
+
+summary(years)
+
+
+StormFocus2 <- StormFocus1 %>% 
+  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))) %>%
+  mutate(harm_to_persons = FATALITIES + INJURIES) %>%
+  mutate(economic_harm = PROPDMG + CROPDMG)
+
+StormFocus2 %>% group_by(CROPDMGEXP) %>% summarize(sum_crop=sum(CROPDMG), count= n())
+
+StormFocus2 %>% group_by(PROPDMGEXP) %>% summarize(sum_prop=sum(PROPDMG), count = n())
+
+str(StormFocus2)
