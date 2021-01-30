@@ -46,7 +46,10 @@ years <- as.numeric(format(as.Date(sub("~","",StormFocus1$BGN_DATE), format="%d/
 
 summary(years)
 
-years <- sub(" 0:00:00","",as.character(StormFocus1$BGN_DATE)) %>% mdy()
+years <- sub(" 0:00:00","",as.character(StormFocus1$BGN_DATE)) %>% 
+  mdy() %>% format("%Y") %>% as.integer()
+
+
 
 
 
