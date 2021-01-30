@@ -26,38 +26,23 @@ StormFocus1 <- stormData1 %>%
   select(BGN_DATE, STATE, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG, PROPDMGEXP, CROPDMGEXP)
 
 ## For harm to persons we will sum the FATALITIES and INJURIES columns.
-## For economic impact we will sum the PROPDMGEXP and CROPDMGEXP columns.
+##
+## For economic impact we will sum the PROPDMG and CROPDMG columns,
+## after adjusting to use the appropriate scale factor or
+## K -- Kilo, M -- Millions, or B -- Billions from the corresponding 
+## PROPDMGEXP and CROPDMGEXP columns.
+##
 ## For time of event we will just extract the year from BGN_DATE
 
-dates1 <- head(StormFocus1$BGN_DATE)
+## Define a function to extract just the calendar year
+## from a factor date column value.
+extractYear <- function(date) {
+  x <- mdy(sub(" 0:00:00","",as.character(date)))
+  as.integer(format(x,"%Y"))
+}
 
-dates2 <- mdy_hms(dates1)
-
-dates3 <- as.Date(dates2)
-
-format(as.Date(dates2, format="%d/%m/%Y"),"%Y")
-
-years <- as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))
-
-summary(years)
-
-
-years <- as.numeric(format(as.Date(sub("~","",StormFocus1$BGN_DATE), format="%d/%m/%Y"),"%Y"))
-
-summary(years)
-
-years <- sub(" 0:00:00","",as.character(StormFocus1$BGN_DATE)) %>% 
-  mdy() %>% format("%Y") %>% as.integer()
-
-
-
-
-
-## StormFocus2 <- StormFocus1 %>% 
-##  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))) %>%
-##  mutate(harm_to_persons = FATALITIES + INJURIES) %>%
-##  mutate(economic_harm = PROPDMG + CROPDMG)
-
+## Define a function to multiple a damage cost colum (PROPDMG or CROPDMG)
+## by the appropriate scale factor.
 mapCost <- function(cost, mult) {
   if(mult == "b" || mult == "B") {
     result <- cost * 1e9
@@ -71,8 +56,9 @@ mapCost <- function(cost, mult) {
   result
 }
 
-StormFocus2 <- StormFocus1 %>% 
-  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y")))
+StormFocus2 <- StormFocus1 %>% rowwise() %>%
+  mutate(year=extractYear(BGN_DATE)) %>%
+  ungroup()
 
 StormFocus3 <- StormFocus2 %>% rowwise() %>%
   mutate(prop_cost=mapCost(PROPDMG, PROPDMGEXP), 
