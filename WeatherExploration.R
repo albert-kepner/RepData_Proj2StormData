@@ -42,10 +42,34 @@ years <- as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"
 summary(years)
 
 
+## StormFocus2 <- StormFocus1 %>% 
+##  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))) %>%
+##  mutate(harm_to_persons = FATALITIES + INJURIES) %>%
+##  mutate(economic_harm = PROPDMG + CROPDMG)
+
+mapCost <- function(cost, mult) {
+  if(mult == "b" || mult == "B") {
+    result <- cost * 1e9
+  } else if(mult == "m" || mult == "M") {
+    result <- cost * 1e6
+  } else if(mult == "k" || mult == "K") {
+    result <- cost * 1e3
+  } else {
+    result <- NA
+  }
+  result
+}
+
 StormFocus2 <- StormFocus1 %>% 
-  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y"))) %>%
-  mutate(harm_to_persons = FATALITIES + INJURIES) %>%
-  mutate(economic_harm = PROPDMG + CROPDMG)
+  mutate(year=as.numeric(format(as.Date(StormFocus1$BGN_DATE, format="%d/%m/%Y"),"%Y")))
+
+StormFocus3 <- StormFocus2 %>% rowwise() %>%
+  mutate(prop_cost=mapCost(PROPDMG, PROPDMGEXP), 
+         crop_cost=mapCost(CROPDMG, CROPDMGEXP)) %>%
+           ungroup()
+         
+         
+  
 
 StormFocus2 %>% group_by(CROPDMGEXP) %>% summarize(sum_crop=sum(CROPDMG), count= n())
 
