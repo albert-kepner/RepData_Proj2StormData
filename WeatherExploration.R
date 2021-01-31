@@ -91,8 +91,20 @@ summary(StormFocus3)
 ## StormFocus3 has selected columns of all observations from the original data set,
 ## and includes the columns we want, YEAR, FATALITIES, INJURIES. We
 ## want to group and summarize this data by year.
-HarmToPersonsByYEAR <- StormFocus3 %>%
+TornadoHarmToPersonsByYear <- StormFocus3 %>%
   filter(EVTYPE == "TORNADO") %>%
-  group_by(YEAR) %>%
+  group_by(year) %>%
   summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
+tdt < data.frame(TornadoHarmToPersonsByYear)
+tdt
 
+## We also want to summarize costs by year for FLOOD damage,
+## which is the highest overall cost event type.
+
+FloodDamageCostByYear <- StormFocus3 %>%
+  filter(EVTYPE == "FLOOD") %>%
+  group_by(year) %>%
+  summarize(Crop_Damage=sum(crop_cost/1e6),
+            Property_Damange=sum(property_cost/1e6))
+fdt <- data.frame(FloodDamageCostByYear)
+fdt
