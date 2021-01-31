@@ -82,6 +82,17 @@ HarmToPersonsRank <- StormFocus4 %>% group_by(Event_Type) %>%
 HarmToPersonsRank
 
 
-         
+## We have found that TORNADO events been the greatest contributor to
+## Harm to persons in aggregate over the the entire period.
+## We would now like to construct a plot which shows how TORNADO related
+## FATALITIES and INJURIES have varied by year.
 
+summary(StormFocus3)
+## StormFocus3 has selected columns of all observations from the original data set,
+## and includes the columns we want, YEAR, FATALITIES, INJURIES. We
+## want to group and summarize this data by year.
+HarmToPersonsByYEAR <- StormFocus3 %>%
+  filter(EVTYPE == "TORNADO") %>%
+  group_by(YEAR) %>%
+  summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
 
