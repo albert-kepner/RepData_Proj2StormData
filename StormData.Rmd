@@ -23,10 +23,12 @@ TBD
 ### Load the zipped CSV file into a data frame
 
 ```{r, cache=TRUE}
+
 library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(lubridate)
+
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
 zipFile <- "data/StormData.csv.bz2"
 download.file(url=url,destfile=zipFile,method="auto")
@@ -138,13 +140,6 @@ TornadoHarmToPersonsByYear <- StormFocus3 %>%
   filter(EVTYPE == "TORNADO") %>%
   group_by(year) %>%
   summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
-```
-
-
-
-```{r}
-tdt <- data.frame(TornadoHarmToPersonsByYear)
-tdt
 ```
 
 

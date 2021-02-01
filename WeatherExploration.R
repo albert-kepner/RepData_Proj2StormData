@@ -162,3 +162,5 @@ row
 ## This one event dominates the other data on weather damage costs.
 ## The total FLOOD damage recorded in this data set is about
 ## 150 billion for all years.
+
+sessionInfo()
