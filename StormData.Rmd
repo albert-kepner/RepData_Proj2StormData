@@ -129,12 +129,21 @@ summary(StormFocus3)
 ### StormFocus3 has a selected subset of columns of all observations from the original data set,
 ### and includes the columns we want, YEAR, FATALITIES, INJURIES. We
 ### want to group and summarize this data by year.
+
+
+
+
 ```{r}
 TornadoHarmToPersonsByYear <- StormFocus3 %>%
   filter(EVTYPE == "TORNADO") %>%
   group_by(year) %>%
   summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
-tdt < data.frame(TornadoHarmToPersonsByYear)
+```
+
+
+
+```{r}
+tdt <- data.frame(TornadoHarmToPersonsByYear)
 tdt
 ```
 
@@ -147,6 +156,11 @@ FloodDamageCostByYear <- StormFocus3 %>%
   group_by(year) %>%
   summarize(Crop_Damage=sum(crop_cost/1e6),
             Property_Damage=sum(property_cost/1e6))
+```
+
+```{r}
+fdt <- data.frame(FloodDamageCostByYear)
+fdt
 ```
 
 ### It appears that FLOOD was not recorded as an Event Type before 1993.

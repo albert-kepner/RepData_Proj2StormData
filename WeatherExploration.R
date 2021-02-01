@@ -96,7 +96,7 @@ TornadoHarmToPersonsByYear <- StormFocus3 %>%
   filter(EVTYPE == "TORNADO") %>%
   group_by(year) %>%
   summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
-tdt < data.frame(TornadoHarmToPersonsByYear)
+tdt <- data.frame(TornadoHarmToPersonsByYear)
 tdt
 
 ## We also want to summarize costs by year for FLOOD damage,
@@ -107,6 +107,9 @@ FloodDamageCostByYear <- StormFocus3 %>%
   group_by(year) %>%
   summarize(Crop_Damage=sum(crop_cost/1e6),
             Property_Damage=sum(property_cost/1e6))
+fdt <- data.frame(FloodDamageCostByYear)
+fdt
+
 
 ## It appears that FLOOD was not recorded as an Event Type before 1993.
 ## This query confirms the count of rows per year for EVTYPE FLOOD.
