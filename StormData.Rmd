@@ -160,7 +160,7 @@ range(FloodCount$year)
 ```
 
 ### The following plot shows a timeline of how Tornado related 
-### deaths and injuries varies by year
+### deaths and injuries have varied by year
 ```{r}
 th <- TornadoHarmToPersonsByYear
 df <- data.frame(Year=th$year, 
@@ -193,4 +193,21 @@ g <- ggplot(df2, aes(Year,Damage)) +
 g
 ```
 
+### It appears that there is an outlier in FLOOD damage cost for 2006
+### which dominates the other data.
+### We can dig into this a little.
+### Find maximum property damage row from original data set.
+```{r}
+hicost <- max(StormFocus3$property_cost)
 
+hicost/1e9
+
+row <- StormFocus3[StormFocus3$property_cost == hicost,]
+
+row
+```
+## There was apparently one flood event in CA in 2006 which
+## which was recorded at 115 Billion in property damage.
+## This one event dominates the other data on weather damage costs.
+## The total FLOOD damage recorded in this data set is about
+## 150 billion for all years.
