@@ -1,6 +1,7 @@
 ## WeatherExploration.R
 library(dplyr)
 library(ggplot2)
+library(reshape2)
 library(lubridate)
 
 
@@ -105,6 +106,56 @@ FloodDamageCostByYear <- StormFocus3 %>%
   filter(EVTYPE == "FLOOD") %>%
   group_by(year) %>%
   summarize(Crop_Damage=sum(crop_cost/1e6),
-            Property_Damange=sum(property_cost/1e6))
-fdt <- data.frame(FloodDamageCostByYear)
-fdt
+            Property_Damage=sum(property_cost/1e6))
+
+## It appears that FLOOD was not recorded as an Event Type before 1993.
+## This query confirms the count of rows per year for EVTYPE FLOOD.
+FloodCount <- StormFocus3 %>%
+  filter(EVTYPE == "FLOOD") %>%
+  group_by(year) %>% summarize(count = n())
+head(FloodCount)
+range(FloodCount$year)
+
+## g <- ggplot(TornadoHarmToPersonsByYear, mapping=aes(Fatalities, Injuries))
+
+th <- TornadoHarmToPersonsByYear
+df <- data.frame(Year=th$year, 
+                 Fatalities=th$Fatalities,
+                 Injuries=th$Injuries)
+str(df)
+df2 <- melt(df, id.vars='Year', variable.name='Event', value.name='Count')
+str(df2)
+
+g <- ggplot(df2, aes(Year,Count)) + geom_line(aes(color=Event)) +
+  labs(title="Tornado Deaths and Injuries by Year 1950-2011")
+g
+
+fd <- FloodDamageCostByYear
+df <- data.frame(Year=fd$year,
+                 Crops=fd$Crop_Damage,
+                 Property=fd$Property_Damage)
+df2 <- melt(df, id.vars="Year", variable.name="DamageType", value.name='Damage')
+str(df2)
+
+g <- ggplot(df2, aes(Year,Damage)) +
+  geom_line() +
+  facet_grid(DamageType ~ .) +
+  labs(title="Flood Damage to Crops and Property by Year 1993-2011") +
+  ylab('Damage $ in millions')
+g
+
+
+### find maximum property damage row from original data set.
+hicost <- max(StormFocus3$property_cost)
+
+hicost/1e9
+
+row <- StormFocus3[StormFocus3$property_cost == hicost,]
+
+row
+
+## There was apparently one flood event in CA in 2006 which
+## which was recorded at 115 Billion in property damage.
+## This one event dominates the other data on weather damage costs.
+## The total FLOOD damage recorded in this data set is about
+## 150 billion for all years.
