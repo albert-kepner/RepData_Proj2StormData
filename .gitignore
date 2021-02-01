@@ -31,6 +31,7 @@ vignettes/*.pdf
 *_cache/
 /cache/
 /data/
+StormData.html
 
 
 # Temporary files created by R markdown

@@ -119,4 +119,78 @@ HarmToPersonsRank <- StormFocus4 %>% group_by(Event_Type) %>%
 HarmToPersonsRank
 ```
 
+### We have found that TORNADO events been the greatest contributor to
+### Harm to persons in aggregate over the the entire period.
+### We would now like to construct a plot which shows how TORNADO related
+### FATALITIES and INJURIES have varied by year.
+```{r}
+summary(StormFocus3)
+```
+### StormFocus3 has a selected subset of columns of all observations from the original data set,
+### and includes the columns we want, YEAR, FATALITIES, INJURIES. We
+### want to group and summarize this data by year.
+```{r}
+TornadoHarmToPersonsByYear <- StormFocus3 %>%
+  filter(EVTYPE == "TORNADO") %>%
+  group_by(year) %>%
+  summarize(Fatalities=sum(FATALITIES),Injuries=sum(INJURIES))
+tdt < data.frame(TornadoHarmToPersonsByYear)
+tdt
+```
+
+
+### We also want to summarize costs by year for FLOOD damage,
+### which is the highest overall cost event type.
+```{r}
+FloodDamageCostByYear <- StormFocus3 %>%
+  filter(EVTYPE == "FLOOD") %>%
+  group_by(year) %>%
+  summarize(Crop_Damage=sum(crop_cost/1e6),
+            Property_Damage=sum(property_cost/1e6))
+```
+
+### It appears that FLOOD was not recorded as an Event Type before 1993.
+### This query confirms the count of rows per year for EVTYPE FLOOD.
+```{r}
+FloodCount <- StormFocus3 %>%
+  filter(EVTYPE == "FLOOD") %>%
+  group_by(year) %>% summarize(count = n())
+head(FloodCount)
+range(FloodCount$year)
+```
+
+### The following plot shows a timeline of how Tornado related 
+### deaths and injuries varies by year
+```{r}
+th <- TornadoHarmToPersonsByYear
+df <- data.frame(Year=th$year, 
+                 Fatalities=th$Fatalities,
+                 Injuries=th$Injuries)
+str(df)
+df2 <- melt(df, id.vars='Year', variable.name='Event', value.name='Count')
+str(df2)
+
+g <- ggplot(df2, aes(Year,Count)) + geom_line(aes(color=Event)) +
+  labs(title="Tornado Deaths and Injuries by Year 1950-2011")
+g
+```
+
+### The following plot shows a timeline of how FLOOD damage
+### costs have varied by year.
+```{r}
+fd <- FloodDamageCostByYear
+df <- data.frame(Year=fd$year,
+                 Crops=fd$Crop_Damage,
+                 Property=fd$Property_Damage)
+df2 <- melt(df, id.vars="Year", variable.name="DamageType", value.name='Damage')
+str(df2)
+
+g <- ggplot(df2, aes(Year,Damage)) +
+  geom_line() +
+  facet_grid(DamageType ~ .) +
+  labs(title="Flood Damage to Crops and Property by Year 1993-2011") +
+  ylab('Damage $ in millions')
+g
+```
+
 
