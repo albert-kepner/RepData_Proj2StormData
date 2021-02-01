@@ -14,13 +14,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Synopsis
-TBD
+This report explores the total cost of property damage and crop damage categorized 
+by weather event types. The event types are ranked by total cost over all data for 
+years 1950-2011 to determine types of events causing the most economic damage.
+We also rank the event types by the sum of fatalities and injuries to determine which 
+types of events cause the most harm to persons.
 
-# Processing
+# Data Processing
 
-### Load libraries and load the data set
-### Download the data file into the ./data directory
-### Load the zipped CSV file into a data frame
+Load libraries and load the data set.  
+Download the data file into the ./data directory.  
+Load the zipped CSV file into a data frame.  
 
 ```{r, cache=TRUE}
 
@@ -38,25 +42,25 @@ stormData1 <- read.csv(zipFile)
 
 ```
 
-### For clarity, select only the columns relating to Date, location(state)
-### Event Type, harm to persons, economic impact
+For clarity, select only the columns relating to Date, location(state)
+Event Type, harm to persons, economic impact
 ```{r, cache=TRUE}
 StormFocus1 <- stormData1 %>% 
   select(BGN_DATE, STATE, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG, PROPDMGEXP, CROPDMGEXP)
 ```
 
-### For harm to persons we will sum the FATALITIES and INJURIES columns.
-###
-### For economic impact we will sum the PROPDMG and CROPDMG columns,
-### after adjusting to use the appropriate scale factor or
-### K -- Kilo, M -- Millions, or B -- Billions from the corresponding 
-### PROPDMGEXP and CROPDMGEXP columns.
-##3
-### For time of event we will just extract the year from BGN_DATE
+For harm to persons we will sum the FATALITIES and INJURIES columns.
+
+For economic impact we will sum the PROPDMG and CROPDMG columns,
+after adjusting to use the appropriate scale factor or
+K -- Kilo, M -- Millions, or B -- Billions from the corresponding 
+PROPDMGEXP and CROPDMGEXP columns.
+
+For time of event we will just extract the year from BGN_DATE
 
 
-### Define a function to multiply a damage cost column (PROPDMG or CROPDMG)
-### by the appropriate scale factor.
+Define a function to multiply a damage cost column (PROPDMG or CROPDMG)
+by the appropriate scale factor.
 ```{r, cache=TRUE}
 mapCost <- function(cost, mult) {
   if(mult == "b" || mult == "B") {
@@ -83,6 +87,7 @@ summary(StormFocus2)
 #### crop_cost columns. We sum total storm damage cost as total_cost for these 2 
 #### columns. We also sum FATALITIES plus INJURIES as harm_to_persons.
 ```{r, cache=TRUE}
+
 StormFocus3 <- StormFocus2 %>% rowwise() %>%
   mutate(property_cost=mapCost(PROPDMG, PROPDMGEXP), 
          crop_cost=mapCost(CROPDMG, CROPDMGEXP),
@@ -101,7 +106,7 @@ summary(StormFocus4)
 ```
 
 
-### Rank Event_Type by total_cost descending (summed across all years and locations)
+#### Rank Event_Type by total_cost descending (summed across all years and locations)
 ```{r, cache=TRUE}
 TotalCostRank <- StormFocus4 %>% group_by(Event_Type) %>%
   summarize(TotalCost = sum(total_cost), Count=n()) %>%
@@ -112,7 +117,7 @@ TotalCostRank
 
 
 
-### Rank Event_type by harm_to_persons descending(summed across all years and locations)
+#### Rank Event_type by harm_to_persons descending(summed across all years and locations)
 ```{r, cache=TRUE}
 HarmToPersonsRank <- StormFocus4 %>% group_by(Event_Type) %>%
   summarize(HarmToPersons = sum(harm_to_persons), Count=n()) %>%
@@ -121,16 +126,16 @@ HarmToPersonsRank <- StormFocus4 %>% group_by(Event_Type) %>%
 HarmToPersonsRank
 ```
 
-### We have found that TORNADO events been the greatest contributor to
-### Harm to persons in aggregate over the the entire period.
-### We would now like to construct a plot which shows how TORNADO related
-### FATALITIES and INJURIES have varied by year.
+We have found that TORNADO events been the greatest contributor to
+Harm to persons in aggregate over the the entire period.
+We would now like to construct a plot which shows how TORNADO related
+FATALITIES and INJURIES have varied by year.
 ```{r}
 summary(StormFocus3)
 ```
-### StormFocus3 has a selected subset of columns of all observations from the original data set,
-### and includes the columns we want, YEAR, FATALITIES, INJURIES. We
-### want to group and summarize this data by year.
+StormFocus3 has a selected subset of columns of all observations from the original data set,
+and includes the columns we want, YEAR, FATALITIES, INJURIES. We
+want to group and summarize this data by year.
 
 
 
@@ -143,8 +148,8 @@ TornadoHarmToPersonsByYear <- StormFocus3 %>%
 ```
 
 
-### We also want to summarize costs by year for FLOOD damage,
-### which is the highest overall cost event type.
+We also want to summarize costs by year for FLOOD damage,
+which is the highest overall cost event type.
 ```{r}
 FloodDamageCostByYear <- StormFocus3 %>%
   filter(EVTYPE == "FLOOD") %>%
@@ -158,8 +163,8 @@ fdt <- data.frame(FloodDamageCostByYear)
 fdt
 ```
 
-### It appears that FLOOD was not recorded as an Event Type before 1993.
-### This query confirms the count of rows per year for EVTYPE FLOOD.
+It appears that FLOOD was not recorded as an Event Type before 1993.
+This query confirms the count of rows per year for EVTYPE FLOOD.
 ```{r}
 FloodCount <- StormFocus3 %>%
   filter(EVTYPE == "FLOOD") %>%
@@ -168,8 +173,8 @@ head(FloodCount)
 range(FloodCount$year)
 ```
 
-### The following plot shows a timeline of how Tornado related 
-### deaths and injuries have varied by year
+The following plot shows a timeline of how Tornado related 
+deaths and injuries have varied by year
 ```{r}
 th <- TornadoHarmToPersonsByYear
 df <- data.frame(Year=th$year, 
@@ -184,8 +189,8 @@ g <- ggplot(df2, aes(Year,Count)) + geom_line(aes(color=Event)) +
 g
 ```
 
-### The following plot shows a timeline of how FLOOD damage
-### costs have varied by year.
+The following plot shows a timeline of how FLOOD damage
+costs have varied by year.
 ```{r}
 fd <- FloodDamageCostByYear
 df <- data.frame(Year=fd$year,
@@ -202,10 +207,10 @@ g <- ggplot(df2, aes(Year,Damage)) +
 g
 ```
 
-### It appears that there is an outlier in FLOOD damage cost for 2006
-### which dominates the other data.
-### We can dig into this a little.
-### Find maximum property damage row from original data set.
+It appears that there is an outlier in FLOOD damage cost for 2006
+which dominates the other data.
+We can dig into this a little.
+Find maximum property damage row from original data set.
 ```{r}
 hicost <- max(StormFocus3$property_cost)
 
@@ -215,8 +220,21 @@ row <- StormFocus3[StormFocus3$property_cost == hicost,]
 
 row
 ```
-## There was apparently one flood event in CA in 2006 which
-## which was recorded at 115 Billion in property damage.
-## This one event dominates the other data on weather damage costs.
-## The total FLOOD damage recorded in this data set is about
-## 150 billion for all years.
+There was apparently one flood event in CA in 2006 which
+which was recorded at 115 Billion in property damage.
+This one event dominates the other data on weather damage costs.
+The total FLOOD damage recorded in this data set is about
+150 billion for all years.
+
+# Results
+
+- In the above analysis, the variable TotalCostRank shows that the top 3 Event Types
+for economic damage were FLOOD, HURRICANE/TYPHOON, and TORNADO, with FLOOD showing
+a total of about $150 billion damage over the entire data set.
+
+- The variable HarmToPersonsRank shows that the top event types causing fatalities and injuries
+were TORNADO, EXCESSIVE HEAT, and TSTM WIND.
+
+- We also showed timelines for FLOOD caused economic damage, and TORNADO harm to persons.
+
+
